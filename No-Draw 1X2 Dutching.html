@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="theme-color" content="#0a0908">
+<title>Dutching</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { background: #0a0908; color: #f5f5f4; font-family: "IBM Plex Sans", system-ui, sans-serif; min-height: 100vh; }
+  body {
+    background-image:
+      linear-gradient(to right, rgba(255,255,255,0.025) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255,255,255,0.025) 1px, transparent 1px);
+    background-size: 28px 28px;
+  }
+  .mono { font-family: "IBM Plex Mono", ui-monospace, monospace; font-variant-numeric: tabular-nums; }
+
+  .wrap { max-width: 480px; margin: 0 auto; padding: 24px 16px 40px; }
+
+  /* Header */
+  header {
+    display: flex; align-items: flex-end; justify-content: space-between;
+    padding-bottom: 16px; margin-bottom: 20px;
+    border-bottom: 1px solid #2a2825;
+  }
+  .eyebrow {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase;
+    color: #8a8780; margin-bottom: 4px;
+  }
+  h1 { font-size: 24px; font-weight: 700; letter-spacing: -0.01em; }
+  .badge {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 10px; letter-spacing: 0.1em; color: #8a8780;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .dot { width: 6px; height: 6px; border-radius: 50%; background: #22c55e; }
+
+  /* Cards */
+  .card {
+    background: #161412;
+    border: 1px solid #2a2825;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .card + .card, .card + .grid, .grid + .card, .card + .hint, .grid + .hint { margin-top: 12px; }
+  .card-pad { padding: 16px; }
+
+  /* Stake input */
+  .label {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;
+    color: #8a8780; display: block; margin-bottom: 8px;
+  }
+  .stake-row { display: flex; align-items: baseline; gap: 8px; }
+  .euro { font-size: 28px; color: #8a8780; font-family: "IBM Plex Mono", monospace; }
+  .stake-input {
+    background: transparent; border: none; outline: none;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 32px; font-weight: 500; color: #f5f5f4;
+    width: 100%; flex: 1;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Odds grid */
+  .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .odds-card { padding: 12px; }
+  .odds-label {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase;
+    color: #8a8780; display: block; margin-bottom: 4px;
+  }
+  .odds-input {
+    background: transparent; border: none; outline: none;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 20px; font-weight: 500; color: #f5f5f4;
+    width: 100%;
+    font-variant-numeric: tabular-nums;
+  }
+  .hint-text {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 8px; color: #5a5853; margin-top: 4px;
+  }
+
+  /* Result */
+  .stakes-row {
+    display: grid; grid-template-columns: 1fr 1fr;
+    border-bottom: 1px solid #2a2825;
+  }
+  .stakes-row > div { padding: 16px; }
+  .stakes-row > div + div { border-left: 1px solid #2a2825; }
+  .stake-label {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase;
+    color: #8a8780; margin-bottom: 4px;
+  }
+  .stake-value {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 24px; font-weight: 500;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .outcomes { padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+  .outcome { display: flex; align-items: baseline; justify-content: space-between; }
+  .outcome-label { font-size: 14px; color: #a3a098; }
+  .outcome-value { font-family: "IBM Plex Mono", monospace; font-size: 16px; font-weight: 500; font-variant-numeric: tabular-nums; }
+  .green { color: #4ade80; }
+  .red { color: #ef4444; }
+  .amber { color: #f59e0b; }
+  .small-pct { font-size: 12px; opacity: 0.7; }
+
+  .probs {
+    border-top: 1px solid #2a2825;
+    padding: 16px;
+    background: #0e0c0a;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .prob-row { display: flex; align-items: baseline; justify-content: space-between; font-size: 14px; }
+  .prob-row .label-text { color: #a3a098; }
+  .prob-row .val { font-family: "IBM Plex Mono", monospace; font-variant-numeric: tabular-nums; }
+  .edge-row { padding-top: 8px; border-top: 1px solid #2a2825; }
+
+  .hint {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 10px; color: #6a6863;
+    line-height: 1.6; padding: 0 4px;
+  }
+
+  .reminder {
+    margin-top: 12px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    border: 1px solid;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 12px;
+    line-height: 1.5;
+    transition: all 0.2s ease;
+  }
+  .reminder-icon {
+    font-family: "IBM Plex Mono", monospace;
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 1;
+    margin-top: 1px;
+    flex-shrink: 0;
+  }
+  .reminder.ok {
+    background: #0d1f12;
+    border-color: rgba(34, 197, 94, 0.3);
+    color: #4ade80;
+  }
+  .reminder.warn {
+    background: #1f1408;
+    border-color: rgba(245, 158, 11, 0.4);
+    color: #fbbf24;
+  }
+  .reminder strong { font-weight: 600; }
+
+  footer {
+    margin-top: 32px; padding-top: 16px;
+    border-top: 1px solid #2a2825;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 10px; color: #5a5853;
+    line-height: 1.6;
+  }
+
+  /* Hide number input spinners */
+  input[type=number]::-webkit-outer-spin-button,
+  input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  input[type=number] { -moz-appearance: textfield; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+
+    <header>
+      <div>
+        <div class="eyebrow">No-Draw 1X2 Dutching</div>
+        <h1>Dutching</h1>
+      </div>
+      <div class="badge">
+        <span class="dot"></span>
+        <span>v1.0</span>
+      </div>
+    </header>
+
+    <!-- Stake -->
+    <div class="card card-pad">
+      <label class="label" for="stake">Total Stake</label>
+      <div class="stake-row">
+        <span class="euro">€</span>
+        <input id="stake" class="stake-input" type="number" inputmode="decimal" value="100">
+      </div>
+    </div>
+
+    <!-- Static rule reminder -->
+    <div class="reminder ok" style="margin-top: 12px;">
+      <span class="reminder-icon">!</span>
+      <span><strong>Rule:</strong> Only use this on matches where the draw odds are <strong>4.00 or higher</strong>. Check the bookie's draw price before entering odds below.</span>
+    </div>
+
+    <!-- Odds -->
+    <div class="grid" style="margin-top: 12px;">
+      <div class="card odds-card">
+        <label class="odds-label" for="oddsH">1 · Home</label>
+        <input id="oddsH" class="odds-input" type="number" step="0.01" inputmode="decimal" value="1.50">
+      </div>
+      <div class="card odds-card">
+        <label class="odds-label" for="oddsA">2 · Away</label>
+        <input id="oddsA" class="odds-input" type="number" step="0.01" inputmode="decimal" value="6.50">
+      </div>
+    </div>
+
+    <!-- Result -->
+    <div id="result" class="card" style="margin-top: 12px;">
+      <div class="stakes-row">
+        <div>
+          <div class="stake-label">Back Home</div>
+          <div class="stake-value" id="stakeH">€0.00</div>
+        </div>
+        <div>
+          <div class="stake-label">Back Away</div>
+          <div class="stake-value" id="stakeA">€0.00</div>
+        </div>
+      </div>
+
+      <div class="outcomes">
+        <div class="outcome">
+          <span class="outcome-label">If Home or Away wins</span>
+          <span class="outcome-value green" id="profit">+€0.00 <span class="small-pct" id="profitPct">(0.00%)</span></span>
+        </div>
+        <div class="outcome">
+          <span class="outcome-label">If Draw</span>
+          <span class="outcome-value red" id="loss">−€0.00</span>
+        </div>
+      </div>
+
+      <div class="probs">
+        <div class="prob-row">
+          <span class="label-text">Break-even P(draw)</span>
+          <span class="val" id="breakEven">—</span>
+        </div>
+      </div>
+    </div>
+
+    <p class="hint" style="margin-top: 16px;">
+      Bet only when you believe the true draw probability is below the break-even line above. If you can't justify why this match draws less often than that, skip it.
+    </p>
+
+    <footer>
+      Account preservation &gt; chasing every edge.
+    </footer>
+
+  </div>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+  const stakeEl = $('stake');
+  const hEl = $('oddsH');
+  const aEl = $('oddsA');
+
+  function fmt(n) {
+    if (!isFinite(n)) return '—';
+    return n.toFixed(2);
+  }
+
+  function calc() {
+    const T = parseFloat(stakeEl.value) || 0;
+    const H = parseFloat(hEl.value) || 0;
+    const A = parseFloat(aEl.value) || 0;
+
+    if (T <= 0 || H <= 1 || A <= 1) {
+      $('stakeH').textContent = '€0.00';
+      $('stakeA').textContent = '€0.00';
+      $('profit').innerHTML = '+€0.00 <span class="small-pct">(0.00%)</span>';
+      $('loss').textContent = '−€0.00';
+      $('breakEven').textContent = '—';
+      return;
+    }
+
+    const invH = 1 / H;
+    const invA = 1 / A;
+    const sumInv = invH + invA;
+
+    const stakeH = (T * invH) / sumInv;
+    const stakeA = (T * invA) / sumInv;
+    const returnAmt = T / sumInv;
+    const profit = returnAmt - T;
+    const profitPct = (profit / T) * 100;
+    const breakEven = (profit / (profit + T)) * 100;
+
+    $('stakeH').textContent = '€' + fmt(stakeH);
+    $('stakeA').textContent = '€' + fmt(stakeA);
+    $('profit').innerHTML = '+€' + fmt(profit) + ' <span class="small-pct">(' + fmt(profitPct) + '%)</span>';
+    $('loss').textContent = '−€' + fmt(T);
+    $('breakEven').textContent = fmt(breakEven) + '%';
+  }
+
+  [stakeEl, hEl, aEl].forEach(el => {
+    el.addEventListener('input', calc);
+    el.addEventListener('change', calc);
+  });
+
+  calc();
+</script>
+</body>
+</html>
